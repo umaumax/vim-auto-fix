@@ -36,7 +36,7 @@ def compare_and_replacer(
 
 
 def vim_auto_fix_add_data(filetype, word, words=[]):
-    if filetype in WORD_LIST_MAP:
+    if filetype not in WORD_LIST_MAP:
         WORD_LIST_MAP[filetype] = []
     WORD_LIST_MAP[filetype] += [word] + words
     return True
