@@ -77,7 +77,7 @@ def vim_auto_fix_init_word_list_map(data_filepath: str) -> bool:
             if data_filepath.endswith('.json'):
                 WORD_LIST_MAP = json.load(f)
             elif data_filepath.endswith('.yaml'):
-                WORD_LIST_MAP = yaml.load(f)
+                WORD_LIST_MAP = yaml.load(f, Loader=yaml.SafeLoader)
             else:
                 print(
                     "[ERROR]: invalid filetype: required json or yaml format",
