@@ -63,7 +63,7 @@ function! vim_auto_fix#add_word(word,...)
 endfunction
 function! vim_auto_fix#add_word_ft(ft,word,...)
   let bad_words=get(a:, 1, [])
-  python3 vim_auto_fix_add_data(vim.eval('a:ft'),vim.eval('a:word'),words=vim.eval('bad_words'))
+  python3 vim_auto_fix_bridge_add_data(vim.eval('a:ft'),vim.eval('a:word'),words=vim.eval('bad_words'))
   echom 'Please update data by :AutoFixDumpToFile'
 endfunction
 function! vim_auto_fix#add_word_common(word,...)

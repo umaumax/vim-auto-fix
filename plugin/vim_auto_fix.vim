@@ -14,9 +14,9 @@ set cpo&vim
 let g:vim_auto_fix_auto_startup = get(g:, 'vim_auto_fix_auto_startup', 0)
 
 command! -nargs=? -complete=file AutoFixDumpToFile :call vim_auto_fix#dump_to_file(<f-args>)
-command! -nargs=1 AutoFixAddWord :call vim_auto_fix#add_word_common(<f-args>)
+command! -nargs=1 AutoFixAddWord :call vim_auto_fix#add_word(<f-args>)
 command! -nargs=1 AutoFixAddWordCommon :call vim_auto_fix#add_word_common(<f-args>)
-command! -nargs=+ AutoFixAddWordFileType :call vim_auto_fix#add_word_common(<f-args>)
+command! -nargs=+ AutoFixAddWordFileType :call vim_auto_fix#add_word_ft(<f-args>)
 
 " NOTE: you cannot modify line(call setline()) at insert mode
 " :help <expr>

@@ -14,3 +14,11 @@ nnoremap <silent> <C-x><C-x> :call vim_auto_fix#auto_fix()<CR>
 ## settings
 * `~/.config/auto_fix/fix.json`: default data filepath
 * `~/.config/auto_fix/fix.log`: default log data filepath
+
+----
+
+## test
+```
+cd autoload
+python -m unittest auto_fix_test.py
+```

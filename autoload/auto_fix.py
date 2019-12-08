@@ -35,10 +35,13 @@ def compare_and_replacer(
     return ret
 
 
-def vim_auto_fix_add_data(filetype, word, words=[]):
+def vim_auto_fix_add_data(
+        data_filepath: str, filetype: str, word: str, words=[]) -> bool:
+    if not vim_auto_fix_init_word_list_map(data_filepath):
+        return False
     if filetype not in WORD_LIST_MAP:
         WORD_LIST_MAP[filetype] = []
-    WORD_LIST_MAP[filetype] += [word] + words
+    WORD_LIST_MAP[filetype] += [[word] + words]
     return True
 
 
@@ -67,11 +70,7 @@ def vim_auto_fix_dump(data_filepath):
     return True
 
 
-def vim_auto_fix_auto_word_fix(
-        word: str, filetype='_', th=0.7, data_filepath: str = ''):
-    if data_filepath == '':
-        print("[ERROR]: filepath is empty", file=sys.stderr)
-        return word
+def vim_auto_fix_init_word_list_map(data_filepath: str) -> bool:
     global WORD_LIST_MAP
     if not WORD_LIST_MAP:
         with open(data_filepath) as f:
@@ -83,7 +82,18 @@ def vim_auto_fix_auto_word_fix(
                 print(
                     "[ERROR]: invalid filetype: required json or yaml format",
                     file=sys.stderr)
-                return word
+                return False
+    return True
+
+
+def vim_auto_fix_auto_word_fix(
+        word: str, filetype='_', th=0.7, data_filepath: str = ''):
+    if data_filepath == '':
+        print("[ERROR]: filepath is empty", file=sys.stderr)
+        return word
+    global WORD_LIST_MAP
+    if not vim_auto_fix_init_word_list_map(data_filepath):
+        return word
     if '_' not in WORD_LIST_MAP:
         print("[ERROR]: '_' filetype not found", file=sys.stderr)
         return word
@@ -94,8 +104,10 @@ def vim_auto_fix_auto_word_fix(
 
     # NOTE: extract word for #inclue -> # inclue -> # include -> #inlcude
     m = re.match(
-        r'(?P<prefix>[^a-zA-Z_-]*)(?P<word>[a-zA-Z_-]*)(?P<suffix>[^a-zA-Z_-]*)',
+        r'^(?P<prefix>[^a-zA-Z_-]*)(?P<word>[a-zA-Z_-]*)(?P<suffix>[^a-zA-Z_-]*)$',
         word)
+    if not m:
+        return word
     newword = compare_and_replacer(m.groupdict()['word'], word_list, th)
     return m.groupdict()['prefix'] + newword + m.groupdict()['suffix']
 
