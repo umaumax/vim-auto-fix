@@ -58,17 +58,16 @@ function! vim_auto_fix#auto_fix(...)
 endfunction
 
 function! vim_auto_fix#add_word(word,...)
-  let bad_word=get(a:, 1, '')
-  call vim_auto_fix#add_word_ft(&filetype, word,bad_word)
+  let bad_words=get(a:, 1, [])
+  call vim_auto_fix#add_word_ft(&filetype, word,bad_words)
 endfunction
 function! vim_auto_fix#add_word_ft(ft,word,...)
-  " TODO: use bad_word for fixed conv
-  let bad_word=get(a:, 1, '')
-  python3 vim_auto_fix_add_data(filetype=vim.eval('&filetype'),vim.eval('a:word'))
+  let bad_words=get(a:, 1, [])
+  python3 vim_auto_fix_add_data(filetype=vim.eval('&filetype'),vim.eval('a:word'),vim.eval('bad_words'))
 endfunction
 function! vim_auto_fix#add_word_common(word,...)
-  let bad_word=get(a:, 1, '')
-  call vim_auto_fix#add_word_ft('_', word,bad_word)
+  let bad_words=get(a:, 1, [])
+  call vim_auto_fix#add_word_ft('_', word,bad_words)
 endfunction
 function! vim_auto_fix#dump_to_file(...)
   let filepath=get(a:, 1, '')

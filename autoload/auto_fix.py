@@ -11,23 +11,32 @@ def similar(a, b):
     return difflib.SequenceMatcher(None, a, b).ratio()
 
 
-def compare_and_replacer(input_word, word_list, th):
+def compare_and_replacer(
+        input_word: str, word_list, th: float) -> str:
     if len(input_word) < 3:
         return input_word
     val = 0.0
     ret = input_word
-    for word in word_list:
-        tmp_val = similar(input_word, word)
-        if tmp_val > th and tmp_val > val:
-            val = tmp_val
-            ret = word
+    for words in word_list:
+        if len(words) == 0:
+            continue
+        base_word = words[0]
+        for word in words:
+            tmp_val = similar(input_word, word)
+            if tmp_val > th and tmp_val > val:
+                val = tmp_val
+                ret = base_word
+    # NOTE: if converted word start with input word, input word has high
+    # priority
+    # if ret.startswith(input_word):
+        # return input_word
     return ret
 
 
-def vim_auto_fix_add_data(filetype, word):
+def vim_auto_fix_add_data(filetype, word, words=[]):
     if filetype in WORD_LIST_MAP:
         WORD_LIST_MAP[filetype] = []
-    WORD_LIST_MAP[filetype] += word
+    WORD_LIST_MAP[filetype] += [word] + words
     return True
 
 
@@ -58,10 +67,10 @@ def vim_auto_fix_auto_word_fix(
     if not WORD_LIST_MAP:
         with open(data_filepath) as f:
             WORD_LIST_MAP = json.load(f)
-    if not '_' in WORD_LIST_MAP:
+    if '_' not in WORD_LIST_MAP:
         print("[ERROR]: '_' filetype not found", file=sys.stderr)
         return line
-    if not filetype in WORD_LIST_MAP:
+    if filetype not in WORD_LIST_MAP:
         # print("[WARN]: '{}' filetype not found".format(filetype), file=sys.stderr)
         WORD_LIST_MAP[filetype] = []
     word_list = WORD_LIST_MAP['_'] + WORD_LIST_MAP[filetype]
