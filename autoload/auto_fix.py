@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import re
 import difflib
 import json
 import yaml
@@ -67,10 +68,10 @@ def vim_auto_fix_dump(data_filepath):
 
 
 def vim_auto_fix_auto_word_fix(
-        line: str, filetype='_', th=0.7, data_filepath: str = ''):
+        word: str, filetype='_', th=0.7, data_filepath: str = ''):
     if data_filepath == '':
         print("[ERROR]: filepath is empty", file=sys.stderr)
-        return line
+        return word
     global WORD_LIST_MAP
     if not WORD_LIST_MAP:
         with open(data_filepath) as f:
@@ -82,20 +83,43 @@ def vim_auto_fix_auto_word_fix(
                 print(
                     "[ERROR]: invalid filetype: required json or yaml format",
                     file=sys.stderr)
-                return line
+                return word
     if '_' not in WORD_LIST_MAP:
         print("[ERROR]: '_' filetype not found", file=sys.stderr)
-        return line
+        return word
     if filetype not in WORD_LIST_MAP:
         # print("[WARN]: '{}' filetype not found".format(filetype), file=sys.stderr)
         WORD_LIST_MAP[filetype] = []
     word_list = WORD_LIST_MAP['_'] + WORD_LIST_MAP[filetype]
-    newline = compare_and_replacer(line, word_list, th)
-    # newline = ' '.join([compare_and_replacer(x, word_list, th) for x in line.split(' ')])
-    return newline
+
+    # NOTE: extract word for #inclue -> # inclue -> # include -> #inlcude
+    m = re.match(
+        r'(?P<prefix>[^a-zA-Z_-]*)(?P<word>[a-zA-Z_-]*)(?P<suffix>[^a-zA-Z_-]*)',
+        word)
+    newword = compare_and_replacer(m.groupdict()['word'], word_list, th)
+    return m.groupdict()['prefix'] + newword + m.groupdict()['suffix']
 
 
-# def main():
-    # line = sys.argv[1]
-    # newline = vim_auto_fix_auto_word_fix(line, 'c')
-    # print(newline)
+def main():
+    import os
+    import argparse
+
+    parser = argparse.ArgumentParser(
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+    parser.add_argument(
+        '-d',
+        '--data-filepath',
+        default=os.path.expanduser("~/.config/auto_fix/fix.yaml"))
+    parser.add_argument('-f', '--filetype', default='_')
+    parser.add_argument('word')
+    parser.add_argument('args', nargs='*')  # any length of args is ok
+
+    args, extra_args = parser.parse_known_args()
+
+    newword = vim_auto_fix_auto_word_fix(
+        args.word, args.filetype, data_filepath=args.data_filepath)
+    print(newword)
+
+
+if __name__ == '__main__':
+    main()
