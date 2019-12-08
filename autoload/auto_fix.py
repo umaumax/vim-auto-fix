@@ -2,6 +2,7 @@
 
 import difflib
 import json
+import yaml
 import sys
 
 WORD_LIST_MAP = {}
@@ -45,28 +46,43 @@ def vim_auto_fix_dump(data_filepath):
         print("[ERROR]: filepath is empty", file=sys.stderr)
         return False
     with open(data_filepath, 'w') as f:
-        WORD_LIST_MAP = json.load(f)
-        json.dump(
-            WORD_LIST_MAP,
-            f,
-            ensure_ascii=False,
-            indent=2,
-            sort_keys=True,
-            separators=(
-                ',',
-                ': '))
+        if data_filepath.endswith('.json'):
+            json.dump(
+                WORD_LIST_MAP,
+                f,
+                ensure_ascii=False,
+                indent=2,
+                sort_keys=True,
+                separators=(
+                    ',',
+                    ': '))
+        elif data_filepath.endswith('.yaml'):
+            yaml.dump(WORD_LIST_MAP, f, default_flow_style=False)
+        else:
+            print(
+                "[ERROR]: invalid filetype: required json or yaml format",
+                file=sys.stderr)
+            return False
     return True
 
 
 def vim_auto_fix_auto_word_fix(
-        line, filetype='_', th=0.7, data_filepath=''):
+        line: str, filetype='_', th=0.7, data_filepath: str = ''):
     if data_filepath == '':
         print("[ERROR]: filepath is empty", file=sys.stderr)
         return line
     global WORD_LIST_MAP
     if not WORD_LIST_MAP:
         with open(data_filepath) as f:
-            WORD_LIST_MAP = json.load(f)
+            if data_filepath.endswith('.json'):
+                WORD_LIST_MAP = json.load(f)
+            elif data_filepath.endswith('.yaml'):
+                WORD_LIST_MAP = yaml.load(f)
+            else:
+                print(
+                    "[ERROR]: invalid filetype: required json or yaml format",
+                    file=sys.stderr)
+                return line
     if '_' not in WORD_LIST_MAP:
         print("[ERROR]: '_' filetype not found", file=sys.stderr)
         return line

@@ -5,7 +5,8 @@ import os
 
 import auto_fix
 
-DATA_FILEPATH = os.path.expanduser('~/.config/auto_fix/fix.json')
+# DATA_FILEPATH = os.path.expanduser('~/.config/auto_fix/fix.json')
+DATA_FILEPATH = os.path.expanduser('~/.config/auto_fix/fix.yaml')
 
 
 def vim_auto_bridge_fix_add_data(filetype, word):
