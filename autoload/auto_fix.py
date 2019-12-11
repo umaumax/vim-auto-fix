@@ -5,26 +5,43 @@ import difflib
 import json
 import yaml
 import sys
+import os
+
+import typodistance
 
 WORD_LIST_MAP = {}
 
 
-def similar(a, b):
-    return difflib.SequenceMatcher(None, a, b).ratio()
+def difflib_similar(base: str, input: str):
+    return difflib.SequenceMatcher(None, base, input).ratio()
+
+
+def typodistance_similar(base: str, input: str):
+    dist = (typodistance.typoDistance(base, input) / len(base))
+    common_prefix_length = len(typodistance.commonprefix([base, input]))
+    # NOTE: for debug only
+    if os.environ.get('AUTO_FIX_DEBUG'):
+        print("[typodistance_similar] base:{}, input:{}, dist:{}, common_prefix_length:{}".format(
+            base, input, dist, common_prefix_length))
+    if common_prefix_length >= len(base):
+        return 0.0
+    if dist < 0.8 and common_prefix_length >= 3:
+        return 1.0
+    return 0.0
 
 
 def compare_and_replacer(
-        input_word: str, word_list, th: float) -> str:
+        input_word: str, word_lists, th: float) -> str:
     if len(input_word) < 3:
         return input_word
     val = 0.0
     ret = input_word
-    for words in word_list:
+    for words in word_lists:
         if len(words) == 0:
             continue
         base_word = words[0]
         for word in words:
-            tmp_val = similar(input_word, word)
+            tmp_val = typodistance_similar(word, input_word)
             if tmp_val > th and tmp_val > val:
                 val = tmp_val
                 ret = base_word
