@@ -104,7 +104,7 @@ def vim_auto_fix_auto_word_fix(
 
     # NOTE: extract word for #inclue -> # inclue -> # include -> #inlcude
     m = re.match(
-        r'^(?P<prefix>[^a-zA-Z_-]*)(?P<word>[a-zA-Z_-]*)(?P<suffix>[^a-zA-Z_-]*)$',
+        r'^(?P<prefix>[^a-zA-Z_]*)(?P<word>[a-zA-Z_]*)(?P<suffix>[^a-zA-Z_]*)$',
         word)
     if not m:
         return word
