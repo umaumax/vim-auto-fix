@@ -4,6 +4,7 @@ vim plugin to fix word before cursor
 
 ## requires
 * python3
+* `pip3 install PyYAML`
 
 ## how to use
 ```
