@@ -37,6 +37,10 @@ function! vim_auto_fix#auto_fix(...)
     let log_data={'lbuffer':lbuffer,'rbuffer':rbuffer,'last_word':last_word,'new_word':new_word}
     echo log_data
   endif
+  " NOTE: for python exception
+  if new_word==-1
+    return v:false
+  endif
   if new_word!=last_word
     let g:fix_log+=[{'input':last_word,'output':new_word}]
     let lbuffer_space=matchstr(lbuffer,' \+$')
