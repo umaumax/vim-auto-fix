@@ -119,14 +119,15 @@ def vim_auto_fix_auto_word_fix(
         WORD_LIST_MAP[filetype] = []
     word_list = WORD_LIST_MAP['_'] + WORD_LIST_MAP[filetype]
 
-    # NOTE: extract word for #inclue -> # inclue -> # include -> #inlcude
-    m = re.match(
-        r'^(?P<prefix>[^a-zA-Z_]*)(?P<word>[a-zA-Z_]*)(?P<suffix>[^a-zA-Z_]*)$',
-        word)
-    if not m:
-        return word
-    newword = compare_and_replacer(m.groupdict()['word'], word_list, th)
-    return m.groupdict()['prefix'] + newword + m.groupdict()['suffix']
+    # NOTE: extract word
+    # #inclue -> # inclue -> # include -> #inlcude
+    # 「hot🔥dog🐶」 -> ['', '「', 'hot', '🔥', 'dog', '🐶」']
+    line_words = re.findall(r'[a-zA-Z_]+|[^a-zA-Z_]+', word)
+    for (i, word) in enumerate(line_words):
+        if re.match(r'^[a-zA-Z_]+$', word):
+            newword = compare_and_replacer(word, word_list, th)
+            line_words[i] = newword
+    return ''.join(line_words)
 
 
 def main():
