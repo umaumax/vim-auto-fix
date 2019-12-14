@@ -11,23 +11,29 @@ import typodistance
 
 WORD_LIST_MAP = {}
 
+AUTO_FIX_DEBUG = ''
+
 
 def difflib_similar(base: str, input: str):
     return difflib.SequenceMatcher(None, base, input).ratio()
 
 
 def typodistance_similar(base: str, input: str):
-    dist = (typodistance.typoDistance(base, input) / len(base))
-    common_prefix_length = len(typodistance.commonprefix([base, input]))
-    # NOTE: for debug only
-    if os.environ.get('AUTO_FIX_DEBUG'):
-        print("[typodistance_similar] base:{}, input:{}, dist:{}, common_prefix_length:{}".format(
-            base, input, dist, common_prefix_length))
     base_score = 10.0
     if base == input:
         return base_score
+    common_prefix_length = len(typodistance.commonprefix([base, input]))
     if common_prefix_length >= len(base):
         return 0.0
+
+    dist = (typodistance.typoDistance(base, input) / len(base))
+    # NOTE: for debug only
+    global AUTO_FIX_DEBUG
+    if not AUTO_FIX_DEBUG:
+        AUTO_FIX_DEBUG = os.environ.get('AUTO_FIX_DEBUG', '0')
+    if AUTO_FIX_DEBUG != '0':
+        print("[typodistance_similar] base:{}, input:{}, dist:{}, common_prefix_length:{}".format(
+            base, input, dist, common_prefix_length))
     if dist < 0.8 and common_prefix_length >= 3:
         # NOTE: to set priority among other word
         return base_score - dist
