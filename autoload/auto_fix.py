@@ -23,10 +23,14 @@ def typodistance_similar(base: str, input: str):
     if os.environ.get('AUTO_FIX_DEBUG'):
         print("[typodistance_similar] base:{}, input:{}, dist:{}, common_prefix_length:{}".format(
             base, input, dist, common_prefix_length))
+    base_score = 10.0
+    if base == input:
+        return base_score
     if common_prefix_length >= len(base):
         return 0.0
     if dist < 0.8 and common_prefix_length >= 3:
-        return 1.0
+        # NOTE: to set priority among other word
+        return base_score - dist
     return 0.0
 
 
