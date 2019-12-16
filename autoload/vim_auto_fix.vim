@@ -14,8 +14,7 @@ if !exists("g:vim_auto_fix_log_filepath")
 endif
 
 let s:this_plugin_directory = escape(expand('<sfile>:p:h'), '\"')
-execute 'python3 import sys; sys.path += ["' . s:this_plugin_directory . '"]'
-py3file <sfile>:p:h/auto_fix.py
+execute printf('python3 import sys; sys.path += ["%s"]', s:this_plugin_directory)
 py3file <sfile>:p:h/vim_bridge.py
 
 let g:fix_log=[]
