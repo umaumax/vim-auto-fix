@@ -83,7 +83,7 @@ function! vim_auto_fix#dump_to_file(...)
 endfunction
 
 function! vim_auto_fix#flush_log()
-  if g:vim_auto_fix_log_flag=0
+  if g:vim_auto_fix_log_flag == 0
     return
   endif
   if empty(g:vim_auto_fix_log_filepath)
