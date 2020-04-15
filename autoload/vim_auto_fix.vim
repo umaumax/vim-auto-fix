@@ -40,7 +40,7 @@ function! vim_auto_fix#auto_fix(...)
   if new_word==-1
     return v:false
   endif
-  if new_word!=last_word
+  if new_word !=# last_word
     let g:fix_log+=[{'input':last_word,'output':new_word}]
     let lbuffer_space=matchstr(lbuffer,' \+$')
     let lbuffer=substitute(lbuffer,' \+$','','')
