@@ -19,20 +19,27 @@ def difflib_similar(base: str, input: str):
 
 
 def typodistance_similar(base: str, input: str):
-    base_score = 10.0
-    if base == input:
-        return base_score
-    common_prefix_length = len(typodistance.commonprefix([base, input]))
-    if common_prefix_length >= len(base):
-        return 0.0
-
-    dist = (typodistance.typoDistance(base, input) / len(base))
     # NOTE: for debug only
     global AUTO_FIX_DEBUG
     if not AUTO_FIX_DEBUG:
         AUTO_FIX_DEBUG = os.environ.get('AUTO_FIX_DEBUG', '0')
+
+    base_score = 10.0
+    if base == input:
+        if AUTO_FIX_DEBUG != '0':
+            print("[typodistance_similar][same input] base:{}, input:{}".format(
+                base, input))
+        return base_score
+    common_prefix_length = len(typodistance.commonprefix([base, input]))
+    if common_prefix_length >= len(base):
+        if AUTO_FIX_DEBUG != '0':
+            print("[typodistance_similar][common prefix] base:{}, input:{}, common_prefix_length:{}".format(
+                base, input, common_prefix_length))
+        return 0.0
+
+    dist = (typodistance.typoDistance(base, input) / len(base))
     if AUTO_FIX_DEBUG != '0':
-        print("[typodistance_similar] base:{}, input:{}, dist:{}, common_prefix_length:{}".format(
+        print("[typodistance_similar][dist] base:{}, input:{}, dist:{}, common_prefix_length:{}".format(
             base, input, dist, common_prefix_length))
     if dist < 0.8 and common_prefix_length >= 3:
         # NOTE: to set priority among other word
@@ -50,6 +57,9 @@ def compare_and_replacer(
         if len(words) == 0:
             continue
         base_word = words[0]
+        if input_word in words[1:]:
+            ret = base_word
+            break
         for word in words:
             tmp_val = typodistance_similar(word, input_word)
             if tmp_val > th and tmp_val > val:

@@ -21,8 +21,8 @@ class FizzBuzzTest(unittest.TestCase):
 
     def test_vim_auto_fix_compare_and_replacer_normal(self):
         base_word = 'sample'
-        word_lists = [['sample']]
-        inputs = ['sample', 'sampel', 'samplw', 'sampl']
+        word_lists = [['sample', 'SAMPLE']]
+        inputs = ['sample', 'sampel', 'samplw', 'sample', 'SAMPLE']
         for input in inputs:
             ret = auto_fix.compare_and_replacer(input, word_lists, th=0.8)
             self.assertEqual(ret, base_word)
