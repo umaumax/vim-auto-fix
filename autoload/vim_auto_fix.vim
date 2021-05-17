@@ -15,11 +15,31 @@ endif
 
 let s:this_plugin_directory = escape(expand('<sfile>:p:h'), '\"')
 execute printf('python3 import sys; sys.path += ["%s"]', s:this_plugin_directory)
-py3file <sfile>:p:h/vim_bridge.py
+
+" check result of loading python file
+" e.g. required yaml package
+let g:vim_auto_fix_error_flag = v:false
+let g:vim_auto_fix_error_message=""
+try
+  py3file <sfile>:p:h/vim_bridge.py
+catch
+  echohl ErrorMsg
+  for line in split(v:exception, "\n")
+    echom line
+    " don't use echoerr because this throw exception and break this scope
+  endfor
+  echohl NONE
+  let g:vim_auto_fix_error_flag = v:true
+  " echoerr ''
+endtry
 
 let g:fix_log=[]
 let g:fix_log_backup=[]
 function! vim_auto_fix#auto_fix(...)
+  if g:vim_auto_fix_error_flag
+    return v:false
+  endif
+
   let cursor_col=get(a:, 1, col('.')-1)
   let line=getline('.')
   " NOTE: 厳密なカーソル区切り or expand('<cword>') 利用区切り?の検討
@@ -30,7 +50,20 @@ function! vim_auto_fix#auto_fix(...)
     return v:false
   endif
   let last_word=words[-1]
-  let new_word=py3eval("vim_auto_fix_bridge_auto_fix(vim.eval('last_word'), filetype=vim.eval('&filetype'))")
+  let new_word=''
+  try
+    let new_word=py3eval("vim_auto_fix_bridge_auto_fix(vim.eval('last_word'), filetype=vim.eval('&filetype'))")
+  catch
+    echohl ErrorMsg
+    for line in split(v:exception, "\n")
+      echom line
+      " don't use echoerr because this throw exception and break this scope
+    endfor
+    echohl NONE
+    let g:vim_auto_fix_error_flag = v:true
+    echoerr ''
+  endtry
+
   let debug_log_flag=0
   if debug_log_flag==1
     let log_data={'lbuffer':lbuffer,'rbuffer':rbuffer,'last_word':last_word,'new_word':new_word}
@@ -61,19 +94,35 @@ function! vim_auto_fix#auto_fix(...)
 endfunction
 
 function! vim_auto_fix#add_word(word,...)
+  if g:vim_auto_fix_error_flag
+    return v:false
+  endif
+
   let bad_words=get(a:, 1, [])
   call vim_auto_fix#add_word_ft(&filetype, a:word,bad_words)
 endfunction
 function! vim_auto_fix#add_word_ft(ft,word,...)
+  if g:vim_auto_fix_error_flag
+    return v:false
+  endif
+
   let bad_words=get(a:, 1, [])
   python3 vim_auto_fix_bridge_add_data(vim.eval('a:ft'),vim.eval('a:word'),words=vim.eval('bad_words'))
   echom 'Please update data by :AutoFixDumpToFile'
 endfunction
 function! vim_auto_fix#add_word_common(word,...)
+  if g:vim_auto_fix_error_flag
+    return v:false
+  endif
+
   let bad_words=get(a:, 1, [])
   call vim_auto_fix#add_word_ft('_', a:word,bad_words)
 endfunction
 function! vim_auto_fix#dump_to_file(...)
+  if g:vim_auto_fix_error_flag
+    return v:false
+  endif
+
   let filepath=get(a:, 1, '')
   if empty(filepath)
     python3 vim_auto_fix_bridge_dump()
@@ -83,6 +132,10 @@ function! vim_auto_fix#dump_to_file(...)
 endfunction
 
 function! vim_auto_fix#flush_log()
+  if g:vim_auto_fix_error_flag
+    return v:false
+  endif
+
   if g:vim_auto_fix_log_flag == 0
     return
   endif
@@ -104,6 +157,10 @@ function! vim_auto_fix#flush_log()
   let g:fix_log={}
 endfunction
 function! vim_auto_fix#term()
+  if g:vim_auto_fix_error_flag
+    return v:false
+  endif
+
   call vim_auto_fix#flush_log()
 endfunction
 augroup vim_auto_fix_term_group
